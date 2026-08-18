@@ -1,0 +1,518 @@
+/* Tokens measured off the live houseontheclouds.com render at a 1440px viewport.
+   `--u` is one design pixel: the whole page is expressed in multiples of it, so
+   the layout scales proportionally and keeps the measured alignment at any width. */
+:root {
+  --cream: rgb(240, 233, 224);
+  --gold: rgb(180, 158, 100);
+  --gold-deep: rgb(161, 142, 94);
+  --nav-ink: rgb(88, 90, 73);
+  --heading-ink: rgba(56, 56, 59, 0.92);
+  --ink: rgb(0, 0, 0);
+  --ink-soft: rgba(0, 0, 0, 0.6);
+
+  /* The live site sets body/nav/buttons in adobe-garamond-pro (Adobe Fonts).
+     It is listed first so that enabling the Adobe Fonts kit in index.html makes
+     the type metrics exact with no other change. EB Garamond is the free
+     stand-in until then and runs ~6% narrower, so lines wrap slightly early. */
+  --font-body: 'adobe-garamond-pro', 'EB Garamond', Georgia, serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+
+  --ease: ease;
+  --fade-dur: 900ms;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-font-smoothing: antialiased; }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  /* The live site's CSS declares 300/500/700 in different places, but its Adobe
+     Fonts kit only ships ONE file — adobe-garamond-pro w700 — so every one of
+     those renders Bold. Measured: 'Photography' is 82.1px wide at 15.36px for
+     every declared weight from 300 to 800. Declaring 700 reproduces that, and
+     stays correct if the real kit is switched on later (it only has w700). */
+  font-weight: 700;
+}
+
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+p { margin: 0; }
+.defs { position: absolute; width: 0; height: 0; }
+
+/* Three scales, measured off the live site at 1440px and 1920px:
+   --u  full-bleed design px. Tracks the viewport, never caps, so hero /
+        mosaic / background images stay edge-to-edge on any monitor.
+   --cw content box width. Grows to 92.3vw then caps at 1405px (the site's
+        maxPageWidth), which is why body columns stop widening on big screens.
+   --c  content design px, and --cx the content box's left edge.
+   --t  type design px. Caps at 1px: font sizes are frozen above 1440, exactly
+        as the real site does (body stays 15.36px, h2 stays 42.24px at 1920). */
+.page {
+  position: relative;
+  width: 100%;
+  container-type: inline-size;
+  --u: calc(100cqw / 1440);
+  --cw: min(92.3cqw, 1405px);
+  --c: calc(var(--cw) / 1329);
+  --cx: calc((100cqw - var(--cw)) / 2);
+  --t: min(var(--u), 1px);
+}
+
+/* ---------------------------------------------------------- stage system */
+.stage { position: relative; width: 100%; }
+.abs { position: absolute; z-index: 1; }
+.abs > img, .abs > a > img { width: 100%; height: 100%; object-fit: cover; }
+.abs:not(.frame):not(.card) > img { object-fit: contain; object-position: left center; }
+.center { text-align: center; }
+.center > img { object-position: center; }
+
+/* ------------------------------------------------------------ typography */
+.body {
+  font-size: calc(15.36 * var(--t));
+  line-height: 1.8;
+  color: var(--ink);
+}
+.body--light { color: #fff; }
+.small {
+  font-size: calc(12 * var(--t));
+  line-height: 1.8;
+  color: var(--ink-soft);
+}
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(42.24 * var(--t));
+  line-height: 1.3;
+  color: var(--heading-ink);
+  margin: 0;
+}
+.display--light { color: #fff; }
+.film-title {
+  display: block;
+  font-size: calc(20.4 * var(--t));
+  line-height: 1.8;
+  font-weight: 700;
+  color: var(--heading-ink);
+}
+.film-title:hover { color: var(--gold-deep); }
+
+/* --------------------------------------------------------------- buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: var(--font-body);
+  font-weight: 700; /* declared 500 upstream, but resolves to the same w700 file */
+  font-size: calc(12 * var(--t));
+  letter-spacing: calc(0.24 * var(--t));
+  line-height: 1.3;
+  padding: calc(14.4 * var(--t));
+  border-radius: calc(4.8 * var(--t));
+  color: #fff;
+  background: var(--gold);
+  transition: background 350ms var(--ease), opacity 350ms var(--ease);
+}
+.btn:hover { background: var(--gold-deep); }
+.btn--fill { width: 100%; height: 100%; }
+.btn--dark { background: var(--ink); }
+.btn--dark:hover { background: #333; }
+
+/* ---------------------------------------------------------------- header */
+/* Header gutter tracks the viewport (--u) but its type and logo are frozen
+   above 1440 (--t) — the live logo is 274px wide at both 1440 and 1920. */
+.hdr { position: absolute; inset: 0 0 auto 0; z-index: 20; height: calc(156 * var(--t)); }
+.hdr-logo { position: absolute; width: calc(274 * var(--t)); height: calc(153 * var(--t)); }
+.hdr-logo img { width: 100%; height: 100%; object-fit: contain; object-position: left center; }
+
+.hdr-right {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: calc(29 * var(--t));
+  height: calc(41 * var(--t));
+}
+.hdr-nav { display: flex; align-items: center; gap: calc(29 * var(--t)); }
+.hdr-nav a, .hdr-folder button {
+  font-family: var(--font-body);
+  font-size: calc(15.36 * var(--t));
+  line-height: 2;
+  color: var(--nav-ink);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity 300ms var(--ease);
+}
+.hdr-nav a:hover, .hdr-folder button:hover { opacity: 0.6; }
+
+.hdr-folder { position: relative; }
+.hdr-folder-menu {
+  position: absolute;
+  top: 180%;
+  left: 50%;
+  translate: -50% 0;
+  display: grid;
+  min-width: calc(150 * var(--t));
+  padding: calc(10 * var(--t)) 0;
+  background: var(--cream);
+  box-shadow: 0 calc(10 * var(--t)) calc(30 * var(--t)) rgba(0, 0, 0, 0.14);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 300ms var(--ease), visibility 300ms;
+}
+.hdr-folder-menu.is-open { opacity: 1; visibility: visible; }
+.hdr-folder-menu a { padding: calc(6 * var(--t)) calc(18 * var(--t)); white-space: nowrap; }
+
+.hdr-social { display: flex; align-items: center; gap: calc(22 * var(--t)); }
+.hdr-social svg, .foot-social svg { width: calc(20 * var(--t)); height: calc(20 * var(--t)); fill: var(--nav-ink); transition: opacity 300ms var(--ease); }
+.hdr-social a:hover svg, .foot-social a:hover svg { opacity: 0.6; }
+.hdr-cta { font-size: calc(10.272 * var(--t)); white-space: nowrap; }
+
+.hdr-burger { display: none; }
+.hdr-overlay { display: none; }
+
+/* ------------------------------------------------------------------ hero */
+/* full viewport, both axes: measured 1440x900 at 900 tall, 1920x1080 at 1080 */
+.hero { height: 100vh; }
+.hero > img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------------------------------------------------------------- images */
+.frame { overflow: hidden; display: block; background: rgba(0, 0, 0, 0.05); }
+.frame img { transition: transform 800ms cubic-bezier(0.4, 0, 0.2, 1); }
+.frame--hover:hover img { transform: scale(1.06); } /* portfolio hover tweak: scale-up */
+
+/* play affordance on the video-backed cards */
+.play::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  translate: -50% -50%;
+  width: calc(58 * var(--t));
+  height: calc(58 * var(--t));
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.42) no-repeat center/calc(18 * var(--t));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M3 1.5v13l11-6.5z'/%3E%3C/svg%3E");
+  pointer-events: none;
+  transition: opacity 300ms var(--ease);
+}
+.play:hover::after { opacity: 0.75; }
+
+/* --------------------------------------------------------------- mosaic */
+.mosaic {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: calc(2.5 * var(--u));
+}
+.mosaic > * { aspect-ratio: 285 / 286; }
+.mosaic img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ------------------------------------------------------- featured cards */
+.featured { z-index: 2; }
+.card > a, .frame > a { display: block; width: 100%; height: 100%; }
+.card-meta { display: grid; justify-items: start; }
+.card-title { font-size: calc(20 * var(--t)); line-height: 1.2; }
+.card-title:hover { opacity: 0.6; }
+.card-date { font-size: calc(13 * var(--t)); line-height: 1.9; }
+
+/* section dividers — the cream chevrons that cut into the film band */
+.chevron {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  width: 100%;
+  height: calc(928 * var(--c));
+  background: var(--cream);
+  clip-path: url(#hoc-chevron);
+}
+.chevron--up {
+  top: calc(-85 * var(--c));
+  height: calc(459 * var(--c));
+  clip-path: url(#hoc-chevron-up);
+}
+
+/* ---------------------------------------------------------------- cinema */
+.cinema { z-index: 1; overflow: hidden; background: #000; }
+.cinema-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cinema-veil { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.72); }
+
+.films { z-index: 2; }
+
+/* ----------------------------------------------------------------- promo */
+.promo { overflow: hidden; }
+.promo-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* scrim so the copy stays readable over whatever photo sits behind it */
+.promo-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.55) 40%, rgba(0, 0, 0, 0) 72%);
+}
+.promo .body { color: rgba(255, 255, 255, 0.9); }
+
+/* ------------------------------------------------------------ about page */
+/* Flow layout, not the measured stage — there is no live page to match here. */
+.page-hero { position: relative; height: calc(560 * var(--u)); }
+.page-hero img { width: 100%; height: 100%; object-fit: cover; }
+/* the header's ink-coloured nav sits on this photo — lift it off with a scrim */
+.page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: calc(200 * var(--u));
+  background: linear-gradient(180deg, rgba(247, 240, 235, 0.92), rgba(247, 240, 235, 0));
+}
+.page-hero h1 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(64 * var(--u));
+  text-align: center;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
+}
+
+.doc {
+  max-width: calc(900 * var(--t));
+  margin: 0 auto;
+  padding: calc(72 * var(--t)) 5vw calc(96 * var(--t));
+  text-align: center;
+}
+.doc-lead { margin-bottom: calc(28 * var(--t)); }
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: calc(40 * var(--t));
+  margin: calc(64 * var(--t)) 0;
+}
+.doc-h {
+  font-family: var(--font-display);
+  font-size: calc(24 * var(--t));
+  font-weight: 400;
+  color: var(--heading-ink);
+  margin: 0 0 calc(12 * var(--t));
+}
+.doc-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(16 * var(--t));
+  margin-bottom: calc(56 * var(--t));
+}
+.doc-gallery .frame { aspect-ratio: 3 / 4; }
+.doc-gallery img { width: 100%; height: 100%; object-fit: cover; }
+.doc-cta { margin-top: calc(16 * var(--t)); }
+
+/* --------------------------------------------------- photography + films */
+.doc--wide { max-width: calc(1280 * var(--t)); }
+.collection { margin-top: calc(72 * var(--t)); }
+.collection .small { margin-bottom: calc(28 * var(--t)); }
+.collection-more { margin-top: calc(24 * var(--t)); }
+/* the anchor links land here, so leave room for the fixed header */
+.collection { scroll-margin-top: calc(120 * var(--t)); }
+
+/* columns, so portrait and landscape frames pack without cropping */
+.masonry { column-count: 3; column-gap: calc(16 * var(--t)); }
+.masonry-item { width: 100%; margin-bottom: calc(16 * var(--t)); break-inside: avoid; }
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: calc(40 * var(--t)) calc(24 * var(--t));
+  margin: calc(56 * var(--t)) 0;
+  text-align: left;
+}
+/* .play::after is absolute — the card has to be its containing block */
+.video-card .frame { display: block; position: relative; aspect-ratio: 16 / 9; }
+.video-card img { width: 100%; height: 100%; object-fit: cover; }
+.video-card .film-title { margin-top: calc(12 * var(--t)); }
+
+/* -------------------------------------------------------- video lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5vw;
+  background: rgba(0, 0, 0, 0.88);
+  animation: lightbox-in 220ms var(--ease);
+}
+@keyframes lightbox-in { from { opacity: 0 } to { opacity: 1 } }
+.lightbox-inner { width: min(1100px, 100%); }
+.lightbox iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  background: #000;
+}
+.lightbox-bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(24 * var(--t));
+  padding-top: calc(12 * var(--t));
+}
+.lightbox-bar .film-title { color: #fff; }
+.lightbox-bar a { color: rgba(255, 255, 255, 0.75); }
+.lightbox-bar a:hover { color: #fff; }
+.lightbox-close {
+  position: absolute;
+  top: calc(16 * var(--t));
+  right: calc(24 * var(--t));
+  background: none;
+  border: 0;
+  color: #fff;
+  font-size: calc(40 * var(--t));
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.lightbox-close:hover { opacity: 1; }
+
+/* ----------------------------------------------------------- contact form */
+.form { display: grid; gap: calc(20 * var(--t)); text-align: left; margin-top: calc(24 * var(--t)); }
+.form-row { display: grid; gap: calc(6 * var(--t)); border: 0; padding: 0; margin: 0; }
+.form input[type='text'], .form input[type='email'], .form textarea {
+  font-family: var(--font-body);
+  font-size: calc(15.36 * var(--t));
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: calc(4.8 * var(--t));
+  padding: calc(11 * var(--t)) calc(13 * var(--t));
+  width: 100%;
+}
+.form input:focus, .form textarea:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+.form-checks { display: flex; flex-wrap: wrap; gap: calc(10 * var(--t)) calc(24 * var(--t)); }
+.form-checks label { display: flex; align-items: center; gap: calc(8 * var(--t)); }
+.form button { justify-self: start; }
+
+@media (max-width: 767px) {
+  .doc-gallery { grid-template-columns: 1fr; }
+  .masonry { column-count: 1; }
+  .video-grid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .masonry { column-count: 2; }
+}
+
+/* ---------------------------------------------------------------- footer */
+.foot-social { display: flex; gap: calc(18 * var(--t)); }
+
+/* ------------------------------------------------------------- animation */
+/* global animation tweak on the live site: style=fade, curve=ease, fires once */
+.reveal { opacity: 0; transition: opacity var(--fade-dur) var(--ease); }
+.reveal.is-in { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transition: none; }
+}
+
+/* ------------------------------------------------------------ responsive */
+/* The measured collage is a desktop composition. Below 900px it unwinds into
+   a single stacked column rather than scaling to an unreadable size. */
+@media (max-width: 900px) {
+  .page { --u: calc(100cqw / 620); --cw: 100cqw; --c: var(--u); --cx: 0px; --t: var(--u); }
+
+  .stage { height: auto !important; padding: 9vw 5vw; }
+  .hero { height: auto; }
+  /* relative, not static: laid out in flow all the same, but it still paints
+     above the absolutely-positioned .promo-veil / .cinema-veil that precede it
+     — and it gives .play::after back a containing block. inset resets the
+     measured left/top that box() writes inline. */
+  .abs {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 0 6vw;
+  }
+  /* tighten a card against the title that follows it, so the pairs read */
+  .abs.card, .abs.play { margin-bottom: 2vw; }
+  .abs > img, .abs > a > img { height: auto; object-fit: contain; }
+  .card > a > img { height: auto; }
+  .body { font-size: 1rem; line-height: 1.75; }
+  .small { font-size: 0.85rem; line-height: 1.7; }
+  .display { font-size: 1.7rem; }
+  .film-title, .card-title { font-size: 1.2rem; }
+  .card-date { font-size: 0.8rem; }
+  .btn { font-size: 0.78rem; padding: 0.9rem 1.4rem; border-radius: 4px; letter-spacing: 0.02em; }
+  .btn--fill { width: auto; }
+
+  .chevron { display: none; }
+  /* the 90deg scrim clears by 72% because desktop keeps the copy in the left
+     column. Stacked, the text runs full width, so it needs a flat one. */
+  .promo-veil { background: rgba(0, 0, 0, 0.6); }
+  .cinema { margin-top: 0 !important; padding: 14vw 5vw; }
+  .cinema .abs > img { object-fit: contain; }
+  .hero { padding: 0; aspect-ratio: 3 / 4 !important; }
+  .hero > img { height: 100%; }
+  .mosaic { grid-template-columns: repeat(2, 1fr); gap: 2px; }
+  .play::after { width: 3rem; height: 3rem; background-size: 1rem; }
+
+  .hdr { height: auto; padding: 4vw 5vw; display: flex; align-items: center; justify-content: space-between; }
+  .hdr-logo { position: static; width: 44vw; height: auto; }
+  .hdr-right { display: none; }
+
+  /* .hdr is absolute and scrolls away, so the burger floats on its own —
+     the home page is ~8500px tall and there is no other way back to the nav.
+     44px is the tap-target floor; the cream disc keeps it legible over photos. */
+  .hdr-burger {
+    position: fixed; top: 4vw; right: 5vw;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    width: 44px; height: 44px;
+    background: rgba(240, 233, 224, 0.88); border: 0; border-radius: 50%;
+    padding: 0; cursor: pointer; z-index: 30;
+  }
+  .hdr-burger span { display: block; width: 26px; height: 1px; background: var(--ink); transition: transform 300ms var(--ease); }
+  .hdr-burger.is-open span:first-child { transform: translateY(3.5px) rotate(45deg); }
+  .hdr-burger.is-open span:last-child { transform: translateY(-3.5px) rotate(-45deg); }
+
+  .hdr-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.1rem;
+    background: var(--cream);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 350ms var(--ease), visibility 350ms;
+  }
+  .hdr-overlay.is-open { opacity: 1; visibility: visible; }
+  .hdr-overlay a { font-family: var(--font-body); font-size: 1.9rem; color: rgb(32, 32, 32); }
+  /* colour has to be restated: `.hdr-overlay a` (0,1,1) outranks `.btn` (0,1,0),
+     so the nav-link ink would otherwise paint near-black on the dark button */
+  .hdr-overlay .btn { margin-top: 1rem; font-size: 0.9rem; color: #fff; }
+  .hdr-overlay-social { display: flex; gap: 1.5rem; margin-top: 1rem; }
+  .hdr-overlay-social svg { width: 22px; height: 22px; fill: var(--nav-ink); }
+
+  /* The doc pages size these off --t, which is 0.63px here — .doc-h landed at
+     15px, under the 16px body it heads, and the inputs at 9.7px. Everything
+     else on mobile is in rem; these were the stragglers. */
+  .doc-h { font-size: 1.25rem; margin-bottom: 0.5rem; }
+  .form { gap: 1rem; }
+  .form-row { gap: 0.35rem; }
+  .form input[type='text'], .form input[type='email'], .form textarea {
+    font-size: 1rem; /* iOS zooms the page on focus below 16px */
+    padding: 0.7rem 0.8rem;
+    border-radius: 4px;
+  }
+  .form-checks { gap: 0.7rem 1.2rem; }
+  /* 25px glyph in the corner of a full-screen overlay was a poor tap target */
+  .lightbox-close { font-size: 2.5rem; top: 0.5rem; right: 1rem; }
+  .lightbox-bar { gap: 1rem; padding-top: 0.6rem; }
+
+  footer.stage { padding-bottom: 12vw; }
+  .foot-social { gap: 1.2rem; }
+  .foot-social svg { width: 22px; height: 22px; }
+}
